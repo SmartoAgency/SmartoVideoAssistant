@@ -1,6 +1,7 @@
 import './quiz.scss';
 import { createVideoElement, numberToLetterInOrder, setOpenIconPosition } from './quiz-utils.js';
 import FormView from './form/formView.js';
+import gsap from 'gsap';
 
 function smartoVideoAssistant(quizSettings) {
     const container = quizSettings.container || document.body;
@@ -34,52 +35,100 @@ function smartoVideoAssistant(quizSettings) {
     // --- Show/Hide Modal ---
     function showModal() {
         modal.style.display = 'block';
-        currentQuestion = 0;
-        userAnswers = [];
-        showQuestion();
-    }
-    function hideModal() {
-        modal.style.display = 'none';
+        gsap.timeline()
+            .set(modal, { display: 'block' })
+            .fromTo(modal, {
+                opacity: 0,
+                y: -50
+            }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                ease: 'power4.out'
+            });
+            currentQuestion = 0;
+            userAnswers = [];
+            showQuestion();
+        }
+        function hideModal() {
+            gsap.timeline()
+            .to(modal, {
+                opacity: 0,
+                y: -50,
+                ease: 'power4.out',
+                duration: 0.5
+            })
+            .set(modal, { display: 'none' });
         modal.querySelectorAll('video').forEach(video => video.pause());
     }
     
     
     // --- Render Question ---
-    function showQuestion() {
+    async function showQuestion() {
         const q = quizSettings.questions[currentQuestion];
         if (!q) return showFeedbackForm();
+        gsap.fromTo(content, { 
+            opacity: 1,
+            xPercent: 0,
+        }, {  
+            duration: 0.5,
+            opacity: 0,
+            ease: 'power4.out',
+            xPercent: currentQuestion == 0 ? 0 : 10,
+        });
+        await sleep(500);
         content.innerHTML = '';
         // Video
+
+        modal.insertAdjacentHTML('beforeend', `
+            <div class="quiz-video__loader">
+                <div class="quiz-video__loader-inner"></div>
+            </div>
+        `);
+
         const v = createVideoElement(q.video);
         content.appendChild(v);
         v.classList.add('quiz-video');
         content.appendChild(v);
+        v.addEventListener('canplaythrough', () => {
+            console.log('Video metadata loaded. Duration:', v.duration, 'Dimensions:', v.videoWidth + 'x' + v.videoHeight);
+            modal.querySelector('.quiz-video__loader').remove();
+            gsap.fromTo(content, { 
+                opacity: 1,
+                xPercent: currentQuestion == 0 ? 0 : -10,
+            }, {  
+                opacity: 1,
+                duration: 0.5,
+                ease: 'power4.out',
+                xPercent: 0,
+            });
+            v.play();
+        }, {
+            once: true
+        });
+
+
+        
 
         // Play/Stop button for video (on question screen)
-        const playBtn = document.createElement('button');
-        playBtn.type = 'button';
-        playBtn.className = 'quiz-video-play-btn';
-        playBtn.innerHTML = v.paused ? '&#9658;' : '&#9208;';
-        playBtn.style.zIndex = '5';
-        playBtn.onclick = (e) => {
+        const playBtn = getPlayButton((e) => {
             e.stopPropagation();
-            if (v.paused) {
-                v.play();
-                playBtn.innerHTML = '&#9208;';
-            } else {
-                v.pause();
-                playBtn.innerHTML = '&#9658;';
-            }
-        };
+            v.paused ? v.play() : v.pause();
+        }, v);
         content.appendChild(playBtn);
+        v.addEventListener('play', (e) => playBtn.innerHTML = '&#9208;');
+        v.addEventListener('pause', (e) => playBtn.innerHTML = '&#9658;');
+
+
+
         // Question
         const qDiv = document.createElement('div');
         qDiv.className = 'quiz-question';
         qDiv.textContent = q.question;
         content.appendChild(qDiv);
         // Answers
-        const aDiv = document.createElement('div');
-        aDiv.className = 'quiz-answers';
+        const responseArea = document.createElement('div');
+        responseArea.className = 'quiz-answers';
         q.answers.forEach((ans, i) => {
             const answerWrapper = document.createElement('div');
             answerWrapper.className = 'quiz-answer-btn-wrapper';
@@ -98,28 +147,29 @@ function smartoVideoAssistant(quizSettings) {
             };
 
             answerWrapper.appendChild(btn);
-            aDiv.appendChild(answerWrapper);
+            responseArea.appendChild(answerWrapper);
         });
-        content.appendChild(aDiv);
+        content.appendChild(responseArea);
     
         // Back button
         if (currentQuestion > 0) {
-            const backBtn = document.createElement('button');
-            backBtn.className = 'quiz-back-btn';
-            backBtn.textContent = '←';
-            backBtn.onclick = (e) => {
+            content.appendChild(getStepBackButton((e) => {
                 e.preventDefault();
                 currentQuestion--;
                 showQuestion();
-            };
-            content.appendChild(backBtn);
+            }));
         }
     }
     
     // --- Feedback Form ---
     function showFeedbackForm() {
         content.innerHTML = '';
-        new FormView(content, quizSettings.formAction)
+        new FormView(content, quizSettings.formAction);
+        content.appendChild(getStepBackButton((e) => {
+            e.preventDefault();
+            currentQuestion--;
+            showQuestion();
+        }));
     }
     
     function initQuiz() {
@@ -136,6 +186,29 @@ function smartoVideoAssistant(quizSettings) {
 }
 window.smartoVideoAssistant = smartoVideoAssistant;
 
+
+function getStepBackButton(onclick) {
+    const backBtn = document.createElement('button');
+    backBtn.className = 'quiz-back-btn';
+    backBtn.textContent = '←';
+    backBtn.onclick = onclick;
+    return backBtn;
+} 
+
+function getPlayButton(onclick = () => {}, v) {
+    const playBtn = document.createElement('button');
+    playBtn.type = 'button';
+    playBtn.className = 'quiz-video-play-btn';
+    playBtn.innerHTML = v.paused ? '&#9658;' : '&#9208;';
+    playBtn.style.zIndex = '5';
+    playBtn.onclick = onclick;
+
+    return playBtn;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function getQuizLayout(quizSettings) {
     return `

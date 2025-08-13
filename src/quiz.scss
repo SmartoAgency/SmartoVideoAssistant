@@ -117,6 +117,22 @@ $background-color_2: var(--quiz-form-success-bg);
 		object-fit: cover;
 		object-position: top;
 	}
+	@media (hover:hover) and (min-width: 1025px) {
+		&__title {
+			transition: .35s ease-in-out;
+		}
+		video {
+			transition: .35s ease-in-out;
+		}
+		&:hover video {
+			transform: scale(1.1);
+		}
+		&:hover &__title {
+			opacity: 0;
+			transform: translateY(50%);
+		}
+	}
+	
 }
 #quiz-modal {
 	display: none;
@@ -247,7 +263,39 @@ $background-color_2: var(--quiz-form-success-bg);
 	object-fit: cover;
 	pointer-events: none;
 	z-index: -1;
+	&__loader {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: calc(100% - 41px);
+		background: var(--quiz-loader-bg, #767676);
+		z-index: 6;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		&-inner {
+			width: 48px;
+			height: 48px;
+			border: 5px solid #FFF;
+			border-bottom-color: transparent;
+			border-radius: 50%;
+			display: inline-block;
+			box-sizing: border-box;
+			animation: rotation 1s linear infinite;
+		}
+	}
 }
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 .quiz-feedback-form {
 
     display: flex;
