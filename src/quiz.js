@@ -116,8 +116,8 @@ function smartoVideoAssistant(quizSettings) {
             v.paused ? v.play() : v.pause();
         }, v);
         content.appendChild(playBtn);
-        v.addEventListener('play', (e) => playBtn.innerHTML = '&#9208;');
-        v.addEventListener('pause', (e) => playBtn.innerHTML = '&#9658;');
+        v.addEventListener('play', (e) => playBtn.innerHTML = getPauseIcon());
+        v.addEventListener('pause', (e) => playBtn.innerHTML = getPlayIcon());
 
 
 
@@ -140,7 +140,7 @@ function smartoVideoAssistant(quizSettings) {
                 <div class="quiz-answer-btn__title">${ans}</div>
             `;
             btn.onclick = () => {
-                userAnswers[currentQuestion] = { question: q.question, answer: ans, correct: typeof q.correct === 'number' ? i === q.correct : undefined };
+                userAnswers[currentQuestion] = { question: q.question, _question: q._question, answer: ans, correct: typeof q.correct === 'number' ? i === q.correct : undefined };
                 userAnswers = userAnswers.slice(0, currentQuestion + 1);
                 currentQuestion++;
                 showQuestion();
@@ -164,7 +164,9 @@ function smartoVideoAssistant(quizSettings) {
     // --- Feedback Form ---
     function showFeedbackForm() {
         content.innerHTML = '';
-        new FormView(content, quizSettings.formAction);
+        new FormView(content, quizSettings.formAction, quizSettings);
+        console.log('userAnswers', userAnswers);
+
         content.appendChild(getStepBackButton((e) => {
             e.preventDefault();
             currentQuestion--;
@@ -190,7 +192,11 @@ window.smartoVideoAssistant = smartoVideoAssistant;
 function getStepBackButton(onclick) {
     const backBtn = document.createElement('button');
     backBtn.className = 'quiz-back-btn';
-    backBtn.textContent = '←';
+    backBtn.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.29291 11.8535L12.1464 17.707L12.8535 17L8.20697 12.3535H17.9999V11.3535H8.20697L12.8535 6.70703L12.1464 6L6.29291 11.8535Z" fill="#FAFBFE"/>
+        </svg>
+    `;
     backBtn.onclick = onclick;
     return backBtn;
 } 
@@ -199,11 +205,28 @@ function getPlayButton(onclick = () => {}, v) {
     const playBtn = document.createElement('button');
     playBtn.type = 'button';
     playBtn.className = 'quiz-video-play-btn';
-    playBtn.innerHTML = v.paused ? '&#9658;' : '&#9208;';
+    playBtn.innerHTML = v.paused ? getPlayIcon() : getPauseIcon();
     playBtn.style.zIndex = '5';
     playBtn.onclick = onclick;
 
     return playBtn;
+}
+
+function getPlayIcon() {
+    return `
+        <svg width="8" height="10" viewBox="0 0 8 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 5L0.5 9.33013L0.5 0.669872L8 5Z" fill="var(--quiz-nav-btn-color)"/>
+        </svg>
+    `
+}
+
+function getPauseIcon() {
+    return `
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="1.5" height="10" fill="var(--quiz-nav-btn-color)"/>
+            <rect x="4" y="6.10352e-05" width="1.5" height="10" fill="var(--quiz-nav-btn-color)"/>
+        </svg>
+    `
 }
 
 function sleep(ms) {
@@ -223,7 +246,11 @@ function getQuizLayout(quizSettings) {
         <!-- Quiz Modal -->
         <div id="quiz-modal">
             <div id="quiz-content"></div>
-            <button id="quiz-close-btn" title="Close">&times;</button>
+            <button id="quiz-close-btn" title="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.707 8L13.207 12.5L17.707 17L17 17.707L12.5 13.207L8 17.707L7.29297 17L11.793 12.5L7.29297 8L8 7.29297L12.5 11.793L17 7.29297L17.707 8Z" fill="#FAFBFE"/>
+                </svg>
+            </button>
             <div class="quiz-modal-footer">
                 <img src="${quizSettings.authorLogo}" alt="Author Logo" />
             </div>

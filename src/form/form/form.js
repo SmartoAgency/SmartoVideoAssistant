@@ -111,6 +111,9 @@ export default class FormMonster {
       const error = this.validate(formData);
       this.fieldsKey.map((key) => {
         const field = this.elements.fields[key];
+
+        console.log('field', field);
+
         field.valid = true;
         field.error = [];
         return null;
@@ -140,11 +143,16 @@ export default class FormMonster {
           this.watchedState.status = 'loading';
           const formData = new FormData(this.elements.$form);
           formData.append('action', 'app');
+          if (document.documentElement.dataset.status === 'local') {
+            this.watchedState.status = 'successSand';
+            return true;
+          }
           const { error, code_error } = await sendForm(formData, this.formAction);
           if (error === 0) {
             this.watchedState.status = 'successSand';
             return true;
           }
+          
           this.watchedState.serverError = code_error;
           this.watchedState.status = 'failed';
         } catch (err) {

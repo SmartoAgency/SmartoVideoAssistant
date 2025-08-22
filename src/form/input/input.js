@@ -1,4 +1,6 @@
 import Cleave from 'cleave.js';
+import intlTelInput from 'intl-tel-input';
+import { get } from 'lodash';
 
 export default class SexyInput {
   constructor(setting) {
@@ -9,6 +11,7 @@ export default class SexyInput {
     this.animation = setting.animation || 'none';
     this.$message = setting.$message || setting.$field.querySelector('[data-input-message]');
     this.$body = document.querySelector('body');
+    this.quizSettings = setting.quizSettings;
     this.init();
   }
 
@@ -69,6 +72,9 @@ export default class SexyInput {
 
   writeMessage(text) {
     this.$message.innerHTML = text;
+    if (!text) {
+      this.$message.textContent = this.$message.dataset.defaultTitle;
+    }
   }
 
   changeStatus(fieldBlock, status) {
@@ -98,24 +104,45 @@ export default class SexyInput {
 
   listeners(input) {
     const self = this;
+
     if (this.typeInput === 'phone') {
+      /* eslint-disable */
       input.setAttribute('inputmode', 'tel');
+      const initialCountry = get(self, 'quizSettings.initial_country', 'us');
+      input.intTelIput = intlTelInput(input, {
+        initialCountry: initialCountry,
+        excludeCountries: ["ru"],
+        autoPlaceholder: 'off',
+      });
+      document.querySelectorAll('.iti').forEach(el => el.setAttribute('data-lenis-prevent', true));
+
+      const initialDialCode = input.intTelIput.countries.find(country => country.iso2 === initialCountry).dialCode
       let cleave = new Cleave(input, {
+        /* eslint-enable */
         numericOnly: true,
-        prefix: '+',
-        blocks: [4, 2, 3, 2, 2],
+        prefix: '+'+initialDialCode,
+        blocks: [initialDialCode.length + 1, 3, 3, 2, 2],
         delimiters: [' ', ' ', ' ', ''],
       });
-      window.addEventListener('succesFormSend', () => {
+      input.addEventListener('countrychange', () => {
+        const currentCountry = input.intTelIput.getSelectedCountryData();
+        const { dialCode } = currentCountry;
+        const selfInput = input;
+        let maskPartForUkraine = currentCountry.iso2 === 'ua' ? 2 : 3;
+
         cleave.destroy();
+        selfInput.value = '';
         cleave = new Cleave(input, {
           numericOnly: true,
-          prefix: '+',
-          blocks: [4, 2, 3, 2, 2],
+          delimiter: '-',
+          prefix: `+${dialCode}`,
+          /* В код страны добавляется символ + */
+          blocks: [dialCode.toString().length + 1, maskPartForUkraine, 3, 2, 2],
           delimiters: [' ', ' ', ' ', ''],
         });
       });
     }
+
     if (this.animation === 'focus') {
       input.addEventListener('focus', self.selectIn(self));
       input.addEventListener('blur', self.selectOut(self));

@@ -1,67 +1,75 @@
 <!doctype html>
-<html lang="en">
-  <head>
+<html lang="en" data-status="local">
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
-  </head>
-  <body>
-  <script type="module" src="/src/main.js"></script>
-  </body>
-      <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            smartoVideoAssistant({
-    
-              "poster": "poster.jpg",
-              openIcon: {
-                  position: 'center-right',
-                  text: 'Choose apartment',
-                  positionsFaq: ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center-left', 'center-right'],
-              },
-              questions: [
-                  {
-                      video: 'Joe-Habitat-Eng-Intro (1).mp4',
-                      question: 'Hi, i am Joe - the personal manager of Habitat Group',
-                      answers: ['Let`s start']
-                  },
-                  {
-                      video: 'Joe-Habitat-Eng-Intro (1).mp4',
-                      question: 'What type of property are you looking for?',
-                      answers: ['Comfort', 'Business', 'Premium'],
-                      orderedList: true
-                  },
-                  {
-                      video: 'Joe-Habitat-Eng-Intro (1).mp4',
-                      question: 'How many rooms would you like?',
-                      answers: ['Studio', '1 Bedroom', '2 Bedrooms', '3+ Bedrooms'],
-                      orderedList: true
-                  },
-                  {
-                      video: 'Joe-Habitat-Eng-Intro (1).mp4',
-                      question: 'What’s the ideal size of the apartment for you?',
-                      answers: ['Up to 450 sq ft', '450–650 sq ft', '650–860 sq ft', '860+ sq ft'],
-                      orderedList: true
-                  },
-                  {
-                      video: 'Joe-Habitat-Eng-Intro (1).mp4',
-                      question: 'Are you planning to buy this property for living or as an investment?',
-                      answers: ['For living', 'For investment'],
-                      orderedList: true
-                  }
-              ],
-              feedbackForm: {
-                  title: 'Thank you for completing the quiz!',
-                  fields: [
-                      { label: 'Your Name', type: 'text', name: 'name', required: true },
-                      { label: 'Email', type: 'email', name: 'email', required: true },
-                      { label: 'Comments', type: 'textarea', name: 'comments' }
-                  ]
-              },
-              "play-button-video": "Joe-Habitat-Eng-Intro (1).mp4",
-              authorLogo: 'main_logo_smart_orange_white 2.png',
-              formAction: '/wp-admin/admin-ajax.php1',
-          })
-        });
-        
-    </script>
+</head>
+
+<body>
+    <script type="module" src="/src/main.js"></script>
+</body>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        smartoVideoAssistant({
+            initial_country: 'us',
+            "poster": "poster.jpg",
+            openIcon: {
+                position: 'center-right',
+                text: 'Choose apartment',
+                positionsFaq: ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center-left', 'center-right'],
+            },
+            questions: [
+                {
+                    video: 'Joe-Habitat-Eng-Intro (1).mp4',
+                    question: 'Hi, i am Joe - the personal manager of Habitat Group',
+                    _question: '',
+                    answers: ['Let`s start']
+                },
+                {
+                    video: 'Joe-Habitat-Eng-Intro (1).mp4',
+                    question: 'What type of property are you looking for?',
+                    _question: 'type_of_property',
+                    answers: ['Comfort', 'Business', 'Premium'],
+                    orderedList: true
+                },
+                {
+                    video: 'Joe-Habitat-Eng-Intro (1).mp4',
+                    question: 'How many rooms would you like?',
+                    _question: 'number_of_rooms',
+                    answers: ['Studio', '1 Bedroom', '2 Bedrooms', '3+ Bedrooms'],
+                    orderedList: true
+                },
+                {
+                    video: 'Joe-Habitat-Eng-Intro (1).mp4',
+                    question: 'What’s the ideal size of the apartment for you?',
+                    _question: 'ideal_apartment_size',
+                    answers: ['Up to 450 sq ft', '450–650 sq ft', '650–860 sq ft', '860+ sq ft'],
+                    orderedList: true
+                },
+                {
+                    video: 'Joe-Habitat-Eng-Intro (1).mp4',
+                    question: 'Are you planning to buy this property for living or as an investment?',
+                    _question: 'property_purpose',
+                    answers: ['For living', 'For investment'],
+                    orderedList: true
+                }
+            ],
+            feedbackForm: {
+                title: 'Thank you for completing the quiz!',
+                fields: [
+                    { label: 'Your Name', type: 'text', name: 'name', required: true },
+                    { label: 'Email', type: 'email', name: 'email', required: true },
+                    { label: 'Comments', type: 'textarea', name: 'comments' }
+                ]
+            },
+            "play-button-video": "Joe-Habitat-Eng-Intro (1).mp4",
+            authorLogo: 'main_logo_smart_orange_white 2.png',
+            formAction: '/wp-admin/admin-ajax.php1',
+        })
+    });
+
+</script>
+
 </html>
